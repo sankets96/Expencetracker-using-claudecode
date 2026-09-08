@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Privacy Policy — Spendly{% endblock %}
+
+{% block content %}
+<div class="privacy-container">
+    <h1>Privacy Policy</h1>
+    <p class="last-updated">Last Updated: September 2026</p>
+
+    <section class="privacy-section">
+        <h2>1. Data We Collect</h2>
+        <p>To provide our services, Spendly collects the following information:</p>
+        <ul>
+            <li><strong>Account Information:</strong> Your full name and email address provided during registration.</li>
+            <li><strong>Financial Data:</strong> Expense amounts, categories, dates, and descriptions that you manually enter into the app.</li>
+            <li><strong>Technical Data:</strong> Basic log data and session information to maintain the security and stability of the service.</li>
+        </ul>
+    </section>
+
+    <section class="privacy-section">
+        <h2>2. How We Use Your Data</h2>
+        <p>We use the collected data for the following purposes:</p>
+        <ul>
+            <li>To provide and maintain your personal expense dashboard.</li>
+            <li>To manage your user account and authenticate your sessions.</li>
+            <li>To improve our app's functionality and user experience.</li>
+            <li>To communicate with you regarding service updates or account issues.</li>
+        </ul>
+    </section>
+
+    <section class="privacy-section">
+        <h2>3. Data Storage</h2>
+        <p>Your data is stored securely in our database. We implement standard security measures to protect your personal information from unauthorized access. However, please remember that no method of transmission over the internet is 100% secure.</p>
+    </section>
+
+    <section class="privacy-section">
+        <h2>4. Third Party Services</h2>
+        <p>Spendly does not sell, trade, or otherwise transfer your personal data to outside parties. We do not use third-party analytics or advertising trackers that compromise your privacy.</p>
+    </section>
+
+    <section class="privacy-section">
+        <h2>5. Contact Us</h2>
+        <p>If you have any questions about this Privacy Policy or the data we collect, please contact us through our official support channels.</p>
+    </section>
+
+    <div class="privacy-footer">
+        <p>Your privacy is important to us.</p>
+        <a href="{{ url_for('landing') }}" class="btn-ghost">Back to Home</a>
+    </div>
+</div>
+
+<style>
+    .privacy-container {
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 20px;
+        line-height: 1.6;
+        color: var(--text-color);
+    }
+    .privacy-container h1 {
+        font-family: 'DM Serif Display', serif;
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+    }
+    .last-updated {
+        color: #666;
+        font-style: italic;
+        margin-bottom: 30px;
+    }
+    .privacy-section {
+        margin-bottom: 30px;
+    }
+    .privacy-section h2 {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+        color: var(--brand-color, #000);
+    }
+    .privacy-section ul {
+        margin-left: 20px;
+        margin-bottom: 10px;
+    }
+    .privacy-section li {
+        margin-bottom: 5px;
+    }
+    .privacy-footer {
+        margin-top: 50px;
+        padding-top: 20px;
+        border-top: 1px solid #ddd;
+        text-align: center;
+    }
+</style>
+{% endblock %}
