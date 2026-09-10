@@ -87,12 +87,42 @@ def profile():
     if "user_id" not in session:
         return redirect(url_for("login"))
 
-    user_id = session["user_id"]
-    user_name = session["user_name"]
+    # Hardcoded data for UI validation as per spec 04-profile-page
+    user_info = {
+        "name": "Sanket Suryavanshi",
+        "email": "sanket@example.com",
+        "member_since": "January 2024",
+        "initials": "SS"
+    }
 
-    expenses = get_expenses_by_user(user_id)
+    summary_stats = {
+        "total_spent": 1250.75,
+        "transaction_count": 42,
+        "top_category": "Food"
+    }
 
-    return render_template("profile.html", user_name=user_name, expenses=expenses)
+    recent_expenses = [
+        {"id": 1, "date": "2024-03-20", "description": "Lunch at Cafe", "category": "Food", "amount": 15.50},
+        {"id": 2, "date": "2024-03-19", "description": "Gas refill", "category": "Transport", "amount": 30.00},
+        {"id": 3, "date": "2024-03-18", "description": "Monthly Internet", "category": "Bills", "amount": 120.00},
+        {"id": 4, "date": "2024-03-17", "description": "Pharmacy", "category": "Health", "amount": 45.00},
+    ]
+
+    category_breakdown = [
+        {"category": "Food", "amount": 450.00, "percentage": 36},
+        {"category": "Transport", "amount": 200.00, "percentage": 16},
+        {"category": "Bills", "amount": 300.00, "percentage": 24},
+        {"category": "Health", "amount": 150.00, "percentage": 12},
+        {"category": "Other", "amount": 150.75, "percentage": 12},
+    ]
+
+    return render_template(
+        "profile.html",
+        user=user_info,
+        stats=summary_stats,
+        expenses=recent_expenses,
+        breakdown=category_breakdown
+    )
 
 
 @app.route("/expenses/add", methods=["GET", "POST"])
