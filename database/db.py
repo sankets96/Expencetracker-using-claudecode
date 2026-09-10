@@ -82,3 +82,99 @@ def seed_db():
             expenses
         )
         conn.commit()
+
+def create_user(name, email, password_hash):
+    """
+    Creates a new user in the database.
+    Returns True if successful, False if the email already exists (IntegrityError).
+    """
+    conn = get_db()
+    try:
+        with conn:
+            conn.execute(
+                "INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)",
+                (name, email, password_hash)
+            )
+        return True
+    except sqlite3.IntegrityError:
+        return False
+    finally:
+        conn.close()
+
+def get_user_by_email(email):
+    """
+    Retrieves a user by their email address.
+    Returns a sqlite3.Row object or None if not found.
+    """
+    conn = get_db()
+    try:
+        return conn.execute(
+            "SELECT * FROM users WHERE email = ?", (email,)
+        ).fetchone()
+    finally:
+        conn.close()
+
+def get_expenses_by_user(user_id):
+    """
+    Retrieves all expenses for a given user, ordered by date descending.
+    """
+    conn = get_db()
+    try:
+        return conn.execute(
+            "SELECT * FROM expenses WHERE user_id = ? ORDER BY date DESC", (user_id,)
+        ).fetchall()
+    finally:
+        conn.close()
+
+def create_expense(user_id, amount, category, date, description):
+    """
+    Adds a new expense record to the database.
+    """
+    conn = get_db()
+    try:
+        with conn:
+            conn.execute(
+                "INSERT INTO expenses (user_id, amount, category, date, description) VALUES (?, ?, ?, ?, ?)",
+                (user_id, amount, category, date, description)
+            )
+    finally:
+        conn.close()
+
+def get_expense_by_id(expense_id, user_id):
+    """
+    Retrieves a specific expense by ID, ensuring it belongs to the given user.
+    """
+    conn = get_db()
+    try:
+        return conn.execute(
+            "SELECT * FROM expenses WHERE id = ? AND user_id = ?", (expense_id, user_id)
+        ).fetchone()
+    finally:
+        conn.close()
+
+def update_expense(expense_id, user_id, amount, category, date, description):
+    """
+    Updates an existing expense record for a specific user.
+    """
+    conn = get_db()
+    try:
+        with conn:
+            conn.execute(
+                "UPDATE expenses SET amount = ?, category = ?, date = ?, description = ? WHERE id = ? AND user_id = ?",
+                (amount, category, date, description, expense_id, user_id)
+            )
+    finally:
+        conn.close()
+
+def delete_expense(expense_id, user_id):
+    """
+    Deletes an expense record for a specific user.
+    """
+    conn = get_db()
+    try:
+        with conn:
+            conn.execute(
+                "DELETE FROM expenses WHERE id = ? AND user_id = ?", (expense_id, user_id)
+            )
+    finally:
+        conn.close()

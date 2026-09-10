@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from werkzeug.security import generate_password_hash, check_password_hash
-from database.db import get_db, init_db, seed_db
+from database.db import init_db, seed_db, create_user, get_user_by_email, get_expenses_by_user, create_expense, get_expense_by_id, update_expense, delete_expense
 
 app = Flask(__name__)
 app.secret_key = "dev-secret-key"
@@ -40,16 +40,10 @@ def register():
             return render_template("register.html", error="All fields are required.")
 
         hashed_password = generate_password_hash(password)
-        db = get_db()
-        try:
-            db.execute(
-                "INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)",
-                (full_name, email, hashed_password)
-            )
-            db.commit()
+        if create_user(full_name, email, hashed_password):
             flash("Account created successfully! Please sign in.")
             return redirect(url_for("login"))
-        except db.IntegrityError:
+        else:
             return render_template("register.html", error="Email already exists.")
 
     return render_template("register.html")
@@ -64,10 +58,7 @@ def login():
         if not email or not password:
             return render_template("login.html", error="All fields are required.")
 
-        db = get_db()
-        user = db.execute(
-            "SELECT * FROM users WHERE email = ?", (email,)
-        ).fetchone()
+        user = get_user_by_email(email)
 
         if user and check_password_hash(user["password_hash"], password):
             session["user_id"] = user["id"]
@@ -99,10 +90,7 @@ def profile():
     user_id = session["user_id"]
     user_name = session["user_name"]
 
-    db = get_db()
-    expenses = db.execute(
-        "SELECT * FROM expenses WHERE user_id = ? ORDER BY date DESC", (user_id,)
-    ).fetchall()
+    expenses = get_expenses_by_user(user_id)
 
     return render_template("profile.html", user_name=user_name, expenses=expenses)
 
@@ -121,13 +109,8 @@ def add_expense():
         if not amount or not category or not date:
             return render_template("add_expense.html", error="Amount, category, and date are required.")
 
-        db = get_db()
         try:
-            db.execute(
-                "INSERT INTO expenses (user_id, amount, category, date, description) VALUES (?, ?, ?, ?, ?)",
-                (session["user_id"], float(amount), category, date, description)
-            )
-            db.commit()
+            create_expense(session["user_id"], float(amount), category, date, description)
             flash("Expense added successfully!")
             return redirect(url_for("profile"))
         except Exception as e:
@@ -141,10 +124,7 @@ def edit_expense(id):
     if "user_id" not in session:
         return redirect(url_for("login"))
 
-    db = get_db()
-    expense = db.execute(
-        "SELECT * FROM expenses WHERE id = ? AND user_id = ?", (id, session["user_id"])
-    ).fetchone()
+    expense = get_expense_by_id(id, session["user_id"])
 
     if not expense:
         return "Expense not found or access denied.", 404
@@ -159,11 +139,7 @@ def edit_expense(id):
             return render_template("edit_expense.html", expense=expense, error="Amount, category, and date are required.")
 
         try:
-            db.execute(
-                "UPDATE expenses SET amount = ?, category = ?, date = ?, description = ? WHERE id = ? AND user_id = ?",
-                (float(amount), category, date, description, id, session["user_id"])
-            )
-            db.commit()
+            update_expense(id, session["user_id"], float(amount), category, date, description)
             flash("Expense updated successfully!")
             return redirect(url_for("profile"))
         except Exception as e:
@@ -177,16 +153,12 @@ def delete_expense(id):
     if "user_id" not in session:
         return redirect(url_for("login"))
 
-    db = get_db()
-    expense = db.execute(
-        "SELECT * FROM expenses WHERE id = ? AND user_id = ?", (id, session["user_id"])
-    ).fetchone()
+    expense = get_expense_by_id(id, session["user_id"])
 
     if not expense:
         return "Expense not found or access denied.", 404
 
-    db.execute("DELETE FROM expenses WHERE id = ? AND user_id = ?", (id, session["user_id"]))
-    db.commit()
+    delete_expense(id, session["user_id"])
     flash("Expense deleted successfully!")
     return redirect(url_for("profile"))
 
