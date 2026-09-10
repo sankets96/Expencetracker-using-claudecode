@@ -1,9 +1,13 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from werkzeug.security import generate_password_hash, check_password_hash
-from database.db import get_db
+from database.db import get_db, init_db, seed_db
 
 app = Flask(__name__)
 app.secret_key = "dev-secret-key"
+
+with app.app_context():
+    init_db()
+    seed_db()
 
 
 # ------------------------------------------------------------------ #
@@ -39,7 +43,7 @@ def register():
         db = get_db()
         try:
             db.execute(
-                "INSERT INTO users (full_name, email, password) VALUES (?, ?, ?)",
+                "INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)",
                 (full_name, email, hashed_password)
             )
             db.commit()
@@ -65,9 +69,9 @@ def login():
             "SELECT * FROM users WHERE email = ?", (email,)
         ).fetchone()
 
-        if user and check_password_hash(user["password"], password):
+        if user and check_password_hash(user["password_hash"], password):
             session["user_id"] = user["id"]
-            session["user_name"] = user["full_name"]
+            session["user_name"] = user["name"]
             flash("Welcome back!")
             return redirect(url_for("profile"))
         else:
